@@ -301,7 +301,7 @@
 
   <nav>
     <div class="nav-left">
-      <a href="/" class="nav-brand">
+      <a href="#" onclick="document.getElementById('goHome').submit();return false;" class="nav-brand">
         <div class="nav-icon"></div>
         JSON Viewer
       </a>
@@ -309,7 +309,7 @@
       <span class="nav-page">Results</span>
     </div>
     <div class="nav-right">
-      <a href="/" class="nav-btn">
+      <a href="#" onclick="document.getElementById('goHome').submit();return false;" class="nav-btn">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.338-2.32 3.75 3.75 0 013.572 5.408A4.5 4.5 0 0118 19.5H6.75z" />
         </svg>
@@ -360,6 +360,7 @@
     </table>
   </div>
 
+  <form id="goHome" method="POST" action="/"></form>
   <footer>Decrypted and rendered on the server &mdash; Node.js + Express + Multer + EJS</footer>
 
   <script>

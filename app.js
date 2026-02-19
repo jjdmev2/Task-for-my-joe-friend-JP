@@ -32,8 +32,18 @@ const upload = multer({
   }
 });
 
-// GET route - show the upload form
+// Landing page - auto-redirects to POST /
 app.get('/', (req, res) => {
+  res.send(`
+    <html><body>
+      <form id="f" method="POST" action="/"></form>
+      <script>document.getElementById('f').submit();</script>
+    </body></html>
+  `);
+});
+
+// POST route - show the upload form
+app.post('/', (req, res) => {
   res.render('index');
 });
 

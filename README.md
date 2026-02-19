@@ -40,7 +40,9 @@ Create a file called `test.json`:
 
 Upload it and you'll see the data displayed in a styled table.
 
-## How It Works
+## How It Works (POST Routes Only)
 
-1. **GET `/`** — Renders the upload form
+1. **POST `/`** — Renders the upload form
 2. **POST `/upload`** — Multer receives the file, the server reads and parses the JSON, then renders the table view with EJS
+
+The app uses POST routes exclusively. When you visit the URL in a browser, a small landing page auto-submits a POST request to load the form.
