@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JSON Viewer &mdash; Results</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    /* Theme variables */
+    :root[data-theme="dark"] {
+      --bg: #0a0a0a;
+      --bg-raised: #111;
+      --bg-hover: #111;
+      --bg-surface: #111;
+      --text: #ededed;
+      --text-secondary: #888;
+      --text-muted: #666;
+      --text-faint: #555;
+      --text-ghost: #444;
+      --text-row-num: #333;
+      --border: #1a1a1a;
+      --border-subtle: #141414;
+      --border-medium: #252525;
+      --border-table: #1f1f1f;
+      --btn-bg: transparent;
+      --btn-text: #888;
+      --btn-border: #252525;
+      --btn-hover-text: #ededed;
+      --btn-hover-border: #444;
+      --btn-hover-bg: #141414;
+      --icon-gradient-from: #fff;
+      --icon-gradient-to: #999;
+      --badge-bg: #111;
+      --badge-border: #1f1f1f;
+    }
+    :root[data-theme="light"] {
+      --bg: #fafafa;
+      --bg-raised: #fff;
+      --bg-hover: #f5f5f5;
+      --bg-surface: #f5f5f5;
+      --text: #111;
+      --text-secondary: #555;
+      --text-muted: #777;
+      --text-faint: #999;
+      --text-ghost: #bbb;
+      --text-row-num: #ccc;
+      --border: #e5e5e5;
+      --border-subtle: #f0f0f0;
+      --border-medium: #ddd;
+      --border-table: #eee;
+      --btn-bg: transparent;
+      --btn-text: #555;
+      --btn-border: #ddd;
+      --btn-hover-text: #111;
+      --btn-hover-border: #999;
+      --btn-hover-bg: #f0f0f0;
+      --icon-gradient-from: #333;
+      --icon-gradient-to: #888;
+      --badge-bg: #f0f0f0;
+      --badge-border: #e5e5e5;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      transition: background-color 0.2s, color 0.2s;
+    }
+
+    /* Navbar */
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      height: 48px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg);
+      flex-shrink: 0;
+    }
+    .nav-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      letter-spacing: -0.3px;
+      text-decoration: none;
+    }
+    .nav-icon {
+      width: 20px;
+      height: 20px;
+      border-radius: 5px;
+      background: linear-gradient(135deg, var(--icon-gradient-from) 0%, var(--icon-gradient-to) 100%);
+    }
+    .nav-sep {
+      color: var(--text-row-num);
+      font-size: 16px;
+      font-weight: 300;
+    }
+    .nav-page {
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--text-secondary);
+    }
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .nav-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      background: var(--btn-bg);
+      color: var(--btn-text);
+      border: 1px solid var(--btn-border);
+      border-radius: 6px;
+      font-size: 13px;
+      font-family: inherit;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.15s;
+    }
+    .nav-btn:hover {
+      color: var(--btn-hover-text);
+      border-color: var(--btn-hover-border);
+      background: var(--btn-hover-bg);
+    }
+    .nav-btn svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    /* Theme toggle */
+    .theme-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      background: none;
+      border: 1px solid var(--btn-border);
+      border-radius: 8px;
+      cursor: pointer;
+      color: var(--text-secondary);
+      transition: all 0.15s;
+    }
+    .theme-toggle:hover {
+      color: var(--text);
+      border-color: var(--btn-hover-border);
+      background: var(--btn-hover-bg);
+    }
+    .theme-toggle svg {
+      width: 16px;
+      height: 16px;
+    }
+    .icon-sun { display: none; }
+    .icon-moon { display: block; }
+    [data-theme="light"] .icon-sun { display: block; }
+    [data-theme="light"] .icon-moon { display: none; }
+
+    /* Subheader */
+    .subheader {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--border);
+    }
+    .subheader-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .file-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 12px;
+      background: var(--badge-bg);
+      border: 1px solid var(--badge-border);
+      border-radius: 6px;
+      font-size: 13px;
+      color: var(--text);
+      font-weight: 500;
+    }
+    .file-badge-icon {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+    .stat {
+      font-size: 13px;
+      color: var(--text-faint);
+    }
+    .stat strong {
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    /* Table */
+    .table-wrapper {
+      flex: 1;
+      overflow-x: auto;
+      padding: 0;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    thead {
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+    th {
+      background: var(--bg-raised);
+      color: var(--text-muted);
+      font-weight: 500;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 10px 20px;
+      text-align: left;
+      border-bottom: 1px solid var(--border-table);
+      white-space: nowrap;
+      user-select: none;
+    }
+    td {
+      padding: 12px 20px;
+      border-bottom: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      white-space: nowrap;
+    }
+    tr {
+      transition: background 0.1s;
+    }
+    tbody tr:hover {
+      background: var(--bg-hover);
+    }
+    tbody tr:hover td {
+      color: var(--text);
+    }
+
+    /* Row number */
+    .row-num {
+      color: var(--text-row-num);
+      font-variant-numeric: tabular-nums;
+      width: 50px;
+      text-align: right;
+      padding-right: 16px;
+    }
+    th.row-num-header {
+      width: 50px;
+      text-align: right;
+      padding-right: 16px;
+    }
+
+    /* Footer */
+    footer {
+      padding: 16px 24px;
+      border-top: 1px solid var(--border);
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-ghost);
+      flex-shrink: 0;
+    }
+
+    /* Fade-in animation */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    tbody tr {
+      animation: fadeUp 0.3s ease forwards;
+      opacity: 0;
+    }
+    <% data.forEach((_, i) => { %>
+    tbody tr:nth-child(<%= i + 1 %>) { animation-delay: <%= Math.min(i * 0.03, 0.5) %>s; }
+    <% }); %>
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="nav-left">
+      <a href="/" class="nav-brand">
+        <div class="nav-icon"></div>
+        JSON Viewer
+      </a>
+      <span class="nav-sep">/</span>
+      <span class="nav-page">Results</span>
+    </div>
+    <div class="nav-right">
+      <a href="/" class="nav-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.338-2.32 3.75 3.75 0 013.572 5.408A4.5 4.5 0 0118 19.5H6.75z" />
+        </svg>
+        New Upload
+      </a>
+      <button class="theme-toggle" id="themeToggle" title="Toggle theme">
+        <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
+        </svg>
+        <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
+        </svg>
+      </button>
+    </div>
+  </nav>
+
+  <div class="subheader">
+    <div class="subheader-left">
+      <div class="file-badge">
+        <span class="file-badge-icon">{ }</span>
+        <%= filename %>
+      </div>
+      <span class="stat"><strong><%= data.length %></strong> rows</span>
+      <span class="stat"><strong><%= headers.length %></strong> columns</span>
+    </div>
+  </div>
+
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th class="row-num-header">#</th>
+          <% headers.forEach(header => { %>
+            <th><%= header %></th>
+          <% }); %>
+        </tr>
+      </thead>
+      <tbody>
+        <% data.forEach((row, index) => { %>
+          <tr>
+            <td class="row-num"><%= index + 1 %></td>
+            <% headers.forEach(header => { %>
+              <td><%= row[header] !== undefined && row[header] !== null ? row[header] : '—' %></td>
+            <% }); %>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </div>
+
+  <footer>Decrypted and rendered on the server &mdash; Node.js + Express + Multer + EJS</footer>
+
+  <script>
+    const html = document.documentElement;
+    const toggle = document.getElementById('themeToggle');
+    const saved = localStorage.getItem('theme');
+    if (saved) html.setAttribute('data-theme', saved);
+
+    toggle.addEventListener('click', () => {
+      const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+    });
+  </script>
+</body>
+</html>

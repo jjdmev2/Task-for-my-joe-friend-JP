@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JSON Viewer</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    /* Theme variables */
+    :root[data-theme="dark"] {
+      --bg: #0a0a0a;
+      --bg-raised: #0f0f0f;
+      --bg-hover: #111;
+      --bg-surface: #111;
+      --text: #ededed;
+      --text-secondary: #888;
+      --text-muted: #666;
+      --text-faint: #555;
+      --text-ghost: #444;
+      --border: #1a1a1a;
+      --border-subtle: #1f1f1f;
+      --border-medium: #252525;
+      --border-dashed: #333;
+      --border-hover: #555;
+      --btn-bg: #ededed;
+      --btn-text: #0a0a0a;
+      --btn-hover: #fff;
+      --btn-disabled-bg: #1a1a1a;
+      --btn-disabled-text: #555;
+      --icon-gradient-from: #fff;
+      --icon-gradient-to: #999;
+      --error-bg: rgba(255, 50, 50, 0.08);
+      --error-border: rgba(255, 50, 50, 0.15);
+      --error-text: #f44;
+    }
+    :root[data-theme="light"] {
+      --bg: #fafafa;
+      --bg-raised: #fff;
+      --bg-hover: #f5f5f5;
+      --bg-surface: #f5f5f5;
+      --text: #111;
+      --text-secondary: #555;
+      --text-muted: #777;
+      --text-faint: #999;
+      --text-ghost: #bbb;
+      --border: #e5e5e5;
+      --border-subtle: #eee;
+      --border-medium: #ddd;
+      --border-dashed: #ccc;
+      --border-hover: #999;
+      --btn-bg: #111;
+      --btn-text: #fff;
+      --btn-hover: #000;
+      --btn-disabled-bg: #eee;
+      --btn-disabled-text: #aaa;
+      --icon-gradient-from: #333;
+      --icon-gradient-to: #888;
+      --error-bg: rgba(255, 50, 50, 0.06);
+      --error-border: rgba(255, 50, 50, 0.2);
+      --error-text: #dc2626;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      transition: background-color 0.2s, color 0.2s;
+    }
+
+    /* Navbar */
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      height: 48px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg);
+    }
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      letter-spacing: -0.3px;
+    }
+    .nav-icon {
+      width: 20px;
+      height: 20px;
+      border-radius: 5px;
+      background: linear-gradient(135deg, var(--icon-gradient-from) 0%, var(--icon-gradient-to) 100%);
+    }
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .nav-badge {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-muted);
+      background: var(--bg-surface);
+      border: 1px solid var(--border-medium);
+      padding: 2px 8px;
+      border-radius: 20px;
+    }
+
+    /* Theme toggle */
+    .theme-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      background: none;
+      border: 1px solid var(--border-medium);
+      border-radius: 8px;
+      cursor: pointer;
+      color: var(--text-secondary);
+      transition: all 0.15s;
+    }
+    .theme-toggle:hover {
+      color: var(--text);
+      border-color: var(--border-hover);
+      background: var(--bg-hover);
+    }
+    .theme-toggle svg {
+      width: 16px;
+      height: 16px;
+    }
+    .icon-sun { display: none; }
+    .icon-moon { display: block; }
+    [data-theme="light"] .icon-sun { display: block; }
+    [data-theme="light"] .icon-moon { display: none; }
+
+    /* Main */
+    .container {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+    }
+    .card {
+      width: 100%;
+      max-width: 480px;
+    }
+    .card h1 {
+      font-size: 24px;
+      font-weight: 600;
+      letter-spacing: -0.5px;
+      margin-bottom: 6px;
+      color: var(--text);
+    }
+    .card p.subtitle {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-bottom: 32px;
+      line-height: 1.5;
+    }
+
+    /* Dropzone */
+    .dropzone {
+      border: 1px dashed var(--border-dashed);
+      border-radius: 10px;
+      padding: 48px 24px;
+      text-align: center;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      position: relative;
+      background: var(--bg-raised);
+    }
+    .dropzone:hover {
+      border-color: var(--border-hover);
+      background: var(--bg-hover);
+    }
+    .dropzone.dragover {
+      border-color: var(--text);
+      background: var(--bg-hover);
+    }
+    .dropzone-icon {
+      width: 40px;
+      height: 40px;
+      margin: 0 auto 16px;
+      border-radius: 10px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-medium);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .dropzone-icon svg {
+      width: 18px;
+      height: 18px;
+      stroke: var(--text-secondary);
+    }
+    .dropzone-text {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 4px;
+    }
+    .dropzone-text span {
+      color: var(--text);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+    .dropzone-hint {
+      font-size: 12px;
+      color: var(--text-faint);
+    }
+    .dropzone input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    /* File preview */
+    .file-preview {
+      display: none;
+      align-items: center;
+      gap: 12px;
+      margin-top: 16px;
+      padding: 12px 16px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+    }
+    .file-preview.show {
+      display: flex;
+    }
+    .file-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-medium);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      flex-shrink: 0;
+    }
+    .file-info {
+      flex: 1;
+      min-width: 0;
+    }
+    .file-name {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .file-size {
+      font-size: 12px;
+      color: var(--text-faint);
+    }
+    .file-remove {
+      background: none;
+      border: none;
+      color: var(--text-faint);
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 4px;
+      transition: color 0.15s;
+      font-size: 16px;
+    }
+    .file-remove:hover {
+      color: var(--text);
+    }
+
+    /* Button */
+    .btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      margin-top: 20px;
+      padding: 0 16px;
+      height: 40px;
+      background: var(--btn-bg);
+      color: var(--btn-text);
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.15s ease;
+      letter-spacing: -0.2px;
+    }
+    .btn:hover {
+      background: var(--btn-hover);
+    }
+    .btn:disabled {
+      background: var(--btn-disabled-bg);
+      color: var(--btn-disabled-text);
+      cursor: not-allowed;
+    }
+    .btn svg {
+      width: 14px;
+      height: 14px;
+      margin-right: 8px;
+    }
+
+    /* Error */
+    .error-msg {
+      margin-top: 16px;
+      padding: 10px 14px;
+      background: var(--error-bg);
+      border: 1px solid var(--error-border);
+      border-radius: 8px;
+      font-size: 13px;
+      color: var(--error-text);
+    }
+
+    /* Footer */
+    footer {
+      padding: 16px 24px;
+      border-top: 1px solid var(--border);
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-ghost);
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="nav-brand">
+      <div class="nav-icon"></div>
+      JSON Viewer
+    </div>
+    <div class="nav-right">
+      <div class="nav-badge">v1.0</div>
+      <button class="theme-toggle" id="themeToggle" title="Toggle theme">
+        <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
+        </svg>
+        <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
+        </svg>
+      </button>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="card">
+      <h1>Upload file</h1>
+      <p class="subtitle">Upload a JSON file to decrypt and visualize its data as a table.</p>
+
+      <form id="uploadForm" action="/upload" method="POST" enctype="multipart/form-data">
+        <div class="dropzone" id="dropzone">
+          <div class="dropzone-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.338-2.32 3.75 3.75 0 013.572 5.408A4.5 4.5 0 0118 19.5H6.75z" />
+            </svg>
+          </div>
+          <p class="dropzone-text"><span>Click to upload</span> or drag and drop</p>
+          <p class="dropzone-hint">JSON files only</p>
+          <input type="file" name="jsonfile" id="fileInput" accept=".json" required>
+        </div>
+
+        <div class="file-preview" id="filePreview">
+          <div class="file-icon">{ }</div>
+          <div class="file-info">
+            <div class="file-name" id="fileName"></div>
+            <div class="file-size" id="fileSize"></div>
+          </div>
+          <button type="button" class="file-remove" id="fileRemove">&times;</button>
+        </div>
+
+        <button type="submit" class="btn" id="submitBtn" disabled>
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+          </svg>
+          Upload & Decrypt
+        </button>
+      </form>
+
+      <% if (typeof error !== 'undefined') { %>
+        <div class="error-msg"><%= error %></div>
+      <% } %>
+    </div>
+  </div>
+
+  <footer>JSON Viewer &mdash; Node.js + Express + Multer + EJS</footer>
+
+  <script>
+    // Theme toggle
+    const html = document.documentElement;
+    const toggle = document.getElementById('themeToggle');
+    const saved = localStorage.getItem('theme');
+    if (saved) html.setAttribute('data-theme', saved);
+
+    toggle.addEventListener('click', () => {
+      const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+    });
+
+    // File upload
+    const dropzone = document.getElementById('dropzone');
+    const fileInput = document.getElementById('fileInput');
+    const filePreview = document.getElementById('filePreview');
+    const fileName = document.getElementById('fileName');
+    const fileSize = document.getElementById('fileSize');
+    const fileRemove = document.getElementById('fileRemove');
+    const submitBtn = document.getElementById('submitBtn');
+
+    function formatBytes(bytes) {
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+      return (bytes / 1048576).toFixed(1) + ' MB';
+    }
+
+    function showFile(file) {
+      fileName.textContent = file.name;
+      fileSize.textContent = formatBytes(file.size);
+      filePreview.classList.add('show');
+      submitBtn.disabled = false;
+    }
+
+    function clearFile() {
+      fileInput.value = '';
+      filePreview.classList.remove('show');
+      submitBtn.disabled = true;
+    }
+
+    fileInput.addEventListener('change', () => {
+      if (fileInput.files.length > 0) showFile(fileInput.files[0]);
+    });
+
+    fileRemove.addEventListener('click', clearFile);
+
+    dropzone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropzone.classList.add('dragover');
+    });
+    dropzone.addEventListener('dragleave', () => {
+      dropzone.classList.remove('dragover');
+    });
+    dropzone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropzone.classList.remove('dragover');
+      if (e.dataTransfer.files.length > 0) {
+        fileInput.files = e.dataTransfer.files;
+        showFile(e.dataTransfer.files[0]);
+      }
+    });
+  </script>
+</body>
+</html>
